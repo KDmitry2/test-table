@@ -6,6 +6,8 @@ type TableProps<DataType> = {
   rows: Array<DataType>;
 };
 
+type typeKeyInObject = keyof Object
+
 interface ICell {
   key: string,
   value: string,
@@ -56,6 +58,18 @@ export function Table<T>({rows}: TableProps<T>) {
 
   }, [searchValue, rows]);
 
+  function printValues(obj: Object) {
+    let result = ""
+    for (let key in obj) {
+      if (typeof obj[key as typeKeyInObject] === "object") {
+        printValues(obj[key as typeKeyInObject]);
+      } else {
+        result += `${key} = ${obj[key as typeKeyInObject]} \n`
+      }
+    }
+    return result
+  }
+
 
   return (
     <div className="mt-4">
@@ -76,7 +90,7 @@ export function Table<T>({rows}: TableProps<T>) {
             Object.keys(rowsTable[0] as Object).map((item, index) => (<th key={index}>{item}</th>))
           }
           {/*Пустой th под кнопку edit*/}
-          <th />
+          <th/>
         </tr>
         </thead>
         <tbody>
@@ -90,8 +104,11 @@ export function Table<T>({rows}: TableProps<T>) {
                     className="align-middle"
                     key={index}
                   >
-                  <span dangerouslySetInnerHTML={{ __html: JSON.stringify(item) }}></span>
-                </td>))
+                    {typeof item === "object" ? <pre
+                        className="mb-0"
+                        dangerouslySetInnerHTML={{__html: printValues(item)}}></pre> :
+                      <pre className="mb-0" dangerouslySetInnerHTML={{__html: item}}></pre>}
+                  </td>))
               }
               <td data-bs-toggle="modal" data-bs-target="#exampleModal" onClick={() => openModal(row, index)}>
                 <button className="btn btn-light">Edit</button>
